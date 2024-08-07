@@ -4,7 +4,7 @@ import argparse
 
 # Where to store the data / results / models / plots
 store = "./store"
-store = "/esat/opal/tmp/back-ups/three-scenarios/store"
+#store = "/esat/opal/tmp/back-ups/three-scenarios/store"
 
 ##-------------------------------------------------------------------------------------------------------------------##
 

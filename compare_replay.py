@@ -30,6 +30,7 @@ def handle_inputs():
     parser = options.add_cl_options(parser, **kwargs)
     # Should some methods not be included?
     parser.add_argument('--no-fromp', action='store_true', help="no FROMP")
+    parser.add_argument('--no-icarl', action='store_true', help="no iCarl")
     # Parse, process (i.e., set defaults for unselected options) and check chosen options
     args = parser.parse_args()
     set_default_values(args, also_hyper_params=False) # -set defaults, some are based on chosen scenario / experiment
@@ -161,7 +162,7 @@ if __name__ == '__main__':
         args.fromp = False
 
     ## iCaRL
-    if args.scenario=="class":
+    if args.scenario=="class" and not checkattr(args, 'no_icarl'):
         args.replay = "none"
         args.prototypes = True
         args.bce = True
@@ -212,7 +213,7 @@ if __name__ == '__main__':
     if not checkattr(args, 'no_fromp'):
         ave_FROMP = []
         sem_FROMP = []
-    if args.scenario=="class":
+    if args.scenario=="class" and not checkattr(args, 'no_icarl'):
         ave_ICARL = []
         sem_ICARL = []
 
@@ -238,7 +239,7 @@ if __name__ == '__main__':
                 if args.n_seeds>1:
                     sem_FROMP.append(np.nan)
 
-        if args.scenario=="class":
+        if args.scenario=="class" and not checkattr(args, 'no_icarl'):
             all_entries = [ICARL[budget][seed] for seed in seed_list]
             ave_ICARL.append(np.mean(all_entries))
             if args.n_seeds > 1:
@@ -255,7 +256,7 @@ if __name__ == '__main__':
         colors.append("goldenrod")
         if args.n_seeds>1:
             errors.append(sem_FROMP)
-    if args.scenario=="class":
+    if args.scenario=="class" and not checkattr(args, 'no_icarl'):
         lines.append(ave_ICARL)
         line_names.append("iCaRL")
         colors.append("purple")
