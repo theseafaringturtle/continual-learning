@@ -41,6 +41,7 @@ class ContinualLearner(nn.Module, metaclass=abc.ABCMeta):
                                      # -inequality = use gradient of replayed data as inequality constraint for gradient
                                      #               of the current data (as in A-GEM; Chaudry et al., 2019; ICLR)
         self.eps_agem = 0.           # parameter that improves numerical stability of AGEM (if set slighly above 0)
+        self.projection = 'a-gem'
         self.lwf_weighting = False   # LwF has different weighting of the 'stability' and 'plasticity' terms than replay
 
         # XdG:

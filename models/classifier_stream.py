@@ -280,12 +280,30 @@ class Classifier(ContinualLearner, MemoryBuffer):
                     grad_cur.append(p.grad.view(-1))
             grad_cur = torch.cat(grad_cur)
             # -check inequality constrain
-            angle = (grad_cur * grad_rep).sum()
-            if angle < 0:
-                # -if violated, project the current gradient onto the gradient of the replayed batch ...
-                length_rep = (grad_rep * grad_rep).sum()
-                grad_proj = grad_cur - (angle / (length_rep + self.eps_agem)) * grad_rep
-                # -...and replace all the gradients within the model with this projected gradient
+            dot_prod = (grad_cur * grad_rep).sum()
+            if self.projection == 'a-gem':
+                if dot_prod < 0:
+                    # -if violated, project the current gradient onto the gradient of the replayed batch ...
+                    length_rep = (grad_rep * grad_rep).sum()
+                    grad_proj = grad_cur - (dot_prod / (length_rep + self.eps_agem)) * grad_rep
+                    # -...and replace all the gradients within the model with this projected gradient
+                    index = 0
+                    for p in self.parameters():
+                        if p.requires_grad:
+                            n_param = p.numel()  # number of parameters in [p]
+                            p.grad.copy_(grad_proj[index:index + n_param].view_as(p))
+                            index += n_param
+            elif self.projection == 'cfa':
+                if dot_prod < 0:
+                    gb_mag_sq = (grad_rep * grad_rep).sum().item()
+                    gn_mag_sq = (grad_cur * grad_cur).sum().item()
+                    # Average the projections of gn-on-gb and gb-on-gn, formula provided in paper's algo is simplified to
+                    # g = (gn - (gn.gb) / (gb.gb) * gb +  gb - (gb.gn) / (gn.gn) * gn ) / 2
+                    # =  ( gn * (1 - (gb.gn) / (gn.gn) + gb * (1 - (gn.gb) / (gb.gb)) / 2
+                    grad_proj = 0.5 * (1 - (dot_prod / gn_mag_sq)) * grad_cur \
+                                + 0.5 * (1 - (dot_prod / gb_mag_sq)) * grad_rep
+                else:
+                    grad_proj = (grad_rep + grad_cur) / 2
                 index = 0
                 for p in self.parameters():
                     if p.requires_grad:

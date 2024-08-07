@@ -146,6 +146,19 @@ if __name__ == '__main__':
         AGEM[budget] = collect_all(AGEM[budget], seed_list, args, name="A-GEM - budget = {}".format(budget))
     args.use_replay = "normal"
 
+    ## CFA
+    args.replay = "buffer"
+    args.distill = False
+    args.sample_selection = "random"
+    args.use_replay = "inequality"
+    args.projection = "cfa"
+    CFA = {}
+    for budget in budget_list:
+        args.budget = budget
+        CFA[budget] = {}
+        CFA[budget] = collect_all(CFA[budget], seed_list, args, name="CFA - budget = {}".format(budget))
+    args.use_replay = "normal"
+
     ## FROMP
     if not checkattr(args, 'no_fromp'):
         args.replay = "none"
@@ -175,7 +188,6 @@ if __name__ == '__main__':
             args.budget = budget
             ICARL[budget] = {}
             ICARL[budget] = collect_all(ICARL[budget], seed_list, args, name="iCaRL - budget = {}".format(budget))
-
 
     #-------------------------------------------------------------------------------------------------#
 
@@ -210,6 +222,8 @@ if __name__ == '__main__':
     sem_ER = []
     ave_AGEM = []
     sem_AGEM = []
+    ave_CFA = []
+    sem_CFA = []
     if not checkattr(args, 'no_fromp'):
         ave_FROMP = []
         sem_FROMP = []
@@ -227,6 +241,11 @@ if __name__ == '__main__':
         ave_AGEM.append(np.mean(all_entries))
         if args.n_seeds > 1:
             sem_AGEM.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
+
+        all_entries = [CFA[budget][seed] for seed in seed_list]
+        ave_CFA.append(np.mean(all_entries))
+        if args.n_seeds > 1:
+            sem_CFA.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
 
         if not checkattr(args, 'no_fromp'):
             if budget<=budget_limit_FROMP:
@@ -246,10 +265,10 @@ if __name__ == '__main__':
                 sem_ICARL.append(np.sqrt(np.var(all_entries) / (len(all_entries) - 1)))
 
     # -collect
-    lines = [ave_ER, ave_AGEM]
-    errors = [sem_ER, sem_AGEM] if args.n_seeds > 1 else None
-    line_names = ["ER", "A-GEM"]
-    colors = ["red", "orangered"]
+    lines = [ave_ER, ave_AGEM, ave_CFA]
+    errors = [sem_ER, sem_AGEM, sem_CFA] if args.n_seeds > 1 else None
+    line_names = ["ER", "A-GEM", "CFA"]
+    colors = ["red", "orangered", "green"]
     if not checkattr(args, 'no_fromp'):
         lines.append(ave_FROMP)
         line_names.append("FROMP")

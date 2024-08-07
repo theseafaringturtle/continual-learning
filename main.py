@@ -291,6 +291,8 @@ def run(args, verbose=False):
     if isinstance(model, ContinualLearner) and hasattr(args, 'use_replay'):
         model.use_replay = args.use_replay
         model.eps_agem = args.eps_agem if hasattr(args, 'eps_agem') else 0.
+        if hasattr(args, 'projection'):
+            model.projection = args.projection
 
     #-------------------------------------------------------------------------------------------------#
 
