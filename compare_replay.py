@@ -11,7 +11,7 @@ from visual import visual_plt
 
 
 ## Memory budget values to compare
-budget_list_CIFAR100 = [1, 2, 5, 10, 20, 50, 100, 200, 500]
+budget_list_CIFAR100 = [1, 2, 5, 10, 20, 50, 100, 200]
 budget_list_splitMNIST = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000]
 
 

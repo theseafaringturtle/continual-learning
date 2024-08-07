@@ -159,6 +159,8 @@ def get_param_stamp(args, model_name, verbose=True, replay_model_name=None, feat
                 hasattr(args, "lr_gen") and (replay_model_name is not None) and (not args.lr==args.lr_gen)
             ) else "",
         )
+        if "A-GEM" in replay_stamp and hasattr(args, 'projection') and args.projection == 'cfa':
+            replay_stamp = replay_stamp.replace("A-GEM", "CFA")
         if verbose:
             print(" --> replay:        " + replay_stamp)
         replay_stamp = "--{}".format(replay_stamp)
