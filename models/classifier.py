@@ -332,8 +332,8 @@ class Classifier(ContinualLearner, MemoryBuffer):
                     # Average the projections of gn-on-gb and gb-on-gn, formula provided in paper's algo is simplified to
                     # g = (gn - (gn.gb) / (gb.gb) * gb +  gb - (gb.gn) / (gn.gn) * gn ) / 2
                     # =  ( gn * (1 - (gb.gn) / (gn.gn) + gb * (1 - (gn.gb) / (gb.gb)) / 2
-                    grad_proj = 0.5 * (1 - (dot_prod / gn_mag_sq)) * grad_cur \
-                                + 0.5 * (1 - (dot_prod / gb_mag_sq)) * grad_rep
+                    grad_proj = 0.5 * (1 - (dot_prod / (gn_mag_sq + self.eps_agem))) * grad_cur \
+                                + 0.5 * (1 - (dot_prod / (gb_mag_sq + self.eps_agem))) * grad_rep
                 else:
                     grad_proj = (grad_rep + grad_cur) / 2
                 index = 0
