@@ -51,6 +51,47 @@ class SubDataset(Dataset):
             sample = (sample[0], target)
         return sample
 
+class FewShotSubDataset(Dataset):
+    def __init__(self, original_dataset, sub_labels, few_shot_samples, target_transform=None):
+        self.dataset = original_dataset
+        self.sub_indeces = []
+        for index in range(len(self.dataset)):
+            if hasattr(original_dataset, "targets"):
+                if self.dataset.target_transform is None:
+                    label = self.dataset.targets[index]
+                else:
+                    label = self.dataset.target_transform(self.dataset.targets[index])
+            else:
+                label = self.dataset[index][1]
+            if label in sub_labels:
+                self.sub_indeces.append(index)
+        self.target_transform = target_transform
+
+        # Reduce dataset for few shot fine-tuning. This should be used for new contexts after 0
+        class_samples = []
+        class_samples_found = {label: 0 for label in sub_labels}
+        index = 0
+        while not all([found == few_shot_samples for found in class_samples_found.values()]):
+            sample, label = self.intermediate_getitem(index)
+            if label in sub_labels and class_samples_found[label] < few_shot_samples:
+                class_samples += [(sample, label)]
+                class_samples_found[label] += 1
+            index += 1
+        self.dataset = class_samples
+
+    def intermediate_getitem(self, index):
+        sample = self.dataset[self.sub_indeces[index]]
+        if self.target_transform:
+            target = self.target_transform(sample[1])
+            sample = (sample[0], target)
+        return sample
+
+    def __getitem__(self, index):
+        return self.dataset[index]
+
+    def __len__(self):
+        return len(self.dataset)
+
 
 class MemorySetDataset(Dataset):
     '''Create dataset from list of <np.arrays> with shape (N, C, H, W) (i.e., with N images each).

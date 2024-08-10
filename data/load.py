@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from torchvision import transforms
 from torch.utils.data import ConcatDataset
-from data.manipulate import permutate_image_pixels, SubDataset, TransformedDataset
+from data.manipulate import permutate_image_pixels, SubDataset, TransformedDataset, FewShotSubDataset
 from data.available import AVAILABLE_DATASETS, AVAILABLE_TRANSFORMS, DATASET_CONFIGS
 
 
@@ -10,7 +10,12 @@ def get_dataset(name, type='train', download=True, capacity=None, permutation=No
                 verbose=False, augment=False, normalize=False, target_transform=None):
     '''Create [train|valid|test]-dataset.'''
 
-    data_name = 'MNIST' if name in ('MNIST28', 'MNIST32') else name
+    if name in ('MNIST28', 'MNIST32'):
+        data_name = 'MNIST'
+    elif name == "CIFAR100_GFSL":
+        data_name = "CIFAR100"
+    else:
+        data_name = name
     dataset_class = AVAILABLE_DATASETS[data_name]
 
     # specify image-transformations to be applied
@@ -75,20 +80,25 @@ def get_context_set(name, scenario, contexts, data_dir="./datasets", only_config
         data_type = 'CIFAR10'
     elif name == "CIFAR100":
         data_type = 'CIFAR100'
+    elif name == "CIFAR100_GFSL":
+        data_type = "CIFAR100_GFSL"
     else:
         raise ValueError('Given undefined experiment: {}'.format(name))
 
     # Get config-dict
     config = DATASET_CONFIGS[data_type].copy()
-    config['normalize'] = normalize if name=='CIFAR100' else False
+    config['normalize'] = normalize if name=='CIFAR100' or name=="CIFAR100_GFSL" else False
     if config['normalize']:
         config['denormalize'] = AVAILABLE_TRANSFORMS["CIFAR100_denorm"]
     # check for number of contexts
     if contexts > config['classes'] and not name=="permMNIST":
         raise ValueError("Experiment '{}' cannot have more than {} contexts!".format(name, config['classes']))
     # -how many classes per context?
-    classes_per_context = 10 if name=="permMNIST" else int(np.floor(config['classes'] / contexts))
-    config['classes_per_context'] = classes_per_context
+    if 'classes_per_context' not in config:
+        classes_per_context = 10 if name=="permMNIST" else int(np.floor(config['classes'] / contexts))
+        config['classes_per_context'] = classes_per_context
+    else:
+        classes_per_context = config['classes_per_context']
     config['output_units'] = classes_per_context if (scenario=='domain' or
                                                     (scenario=="task" and singlehead)) else classes_per_context*contexts
     # -if only config-dict is needed, return it
@@ -139,11 +149,14 @@ def get_context_set(name, scenario, contexts, data_dir="./datasets", only_config
         ]
         # split the train and test datasets up into sub-datasets
         train_datasets = []
-        for labels in labels_per_dataset_train:
+        for context, labels in enumerate(labels_per_dataset_train):
             target_transform = transforms.Lambda(lambda y, x=labels[0]: y-x) if (
                     scenario=='domain' or (scenario=='task' and singlehead)
             ) else None
-            train_datasets.append(SubDataset(trainset, labels, target_transform=target_transform))
+            if 'few_shot_samples' in config and context > 0:
+                train_datasets.append(FewShotSubDataset(trainset, labels, config['few_shot_samples'], target_transform=target_transform))
+            else:
+                train_datasets.append(SubDataset(trainset, labels, target_transform=target_transform))
         test_datasets = []
         for labels in labels_per_dataset_test:
             target_transform = transforms.Lambda(lambda y, x=labels[0]: y-x) if (

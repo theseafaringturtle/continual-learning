@@ -12,6 +12,7 @@ from visual import visual_plt
 
 ## Memory budget values to compare
 budget_list_CIFAR100 = [1, 2, 5, 10, 20, 50, 100, 200]
+budget_list_CIFAR100_GFSL = [5, 10]
 budget_list_splitMNIST = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000]
 
 
@@ -31,6 +32,7 @@ def handle_inputs():
     # Should some methods not be included?
     parser.add_argument('--no-fromp', action='store_true', help="no FROMP")
     parser.add_argument('--no-icarl', action='store_true', help="no iCarl")
+    parser.add_argument('--per-context-acc', action='store_true', help="print accuracy for each context, alternative to --verbose")
     # Parse, process (i.e., set defaults for unselected options) and check chosen options
     args = parser.parse_args()
     set_default_values(args, also_hyper_params=False) # -set defaults, some are based on chosen scenario / experiment
@@ -83,7 +85,12 @@ if __name__ == '__main__':
         os.mkdir(args.p_dir)
 
     ## Select correct memory budget list
-    budget_list = budget_list_CIFAR100 if args.experiment=="CIFAR100" else budget_list_splitMNIST
+    if args.experiment == "CIFAR100":
+        budget_list = budget_list_CIFAR100
+    elif args.experiment == "CIFAR100_GFSL":
+        budget_list = budget_list_CIFAR100_GFSL
+    else:
+        budget_list = budget_list_splitMNIST
 
 
     #-------------------------------------------------------------------------------------------------#

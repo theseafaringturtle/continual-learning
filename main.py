@@ -465,7 +465,7 @@ def run(args, verbose=False):
                 range(config['classes_per_context']*i, config['classes_per_context']*(i+1))
             ) if (args.scenario=="task" and not checkattr(args, 'singlehead')) else None,
         )
-        if verbose:
+        if verbose or checkattr(args, 'per_context_acc'):
             print(" - Context {}: {:.4f}".format(i + 1, acc))
         accs.append(acc)
     average_accs = sum(accs) / args.contexts

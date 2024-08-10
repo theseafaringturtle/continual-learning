@@ -146,7 +146,7 @@ def plot_lines(list_with_lines, x_axes=None, line_names=None, colors=None, title
     for line_id, name in enumerate(line_names):
         axarr.plot(x_axes, list_with_lines[line_id], label=name,
                    color=None if (colors is None) else colors[line_id],
-                   linewidth=4, marker='o' if with_dots else None, linestyle=linestyle if type(linestyle)==str else linestyle[line_id])
+                   linewidth=2, marker='o' if with_dots else None, linestyle=linestyle if type(linestyle)==str else linestyle[line_id])
 
     # add horizontal line
     if h_line is not None:
