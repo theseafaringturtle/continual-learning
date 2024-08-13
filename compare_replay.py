@@ -146,6 +146,7 @@ if __name__ == '__main__':
     args.distill = False
     args.sample_selection = "random"
     args.use_replay = "inequality"
+    args.projection = "a-gem"
     AGEM = {}
     for budget in budget_list:
         args.budget = budget
