@@ -11,8 +11,8 @@ from visual import visual_plt
 
 
 ## Memory budget values to compare
-budget_list_CIFAR100 = [1, 2, 5, 10, 20, 50, 100, 200]
-budget_list_CIFAR100_GFSL = [5, 10]
+budget_list_CIFAR100 = [10, 20, 50, 100]
+budget_list_CIFAR100_GFSL = [10]
 budget_list_splitMNIST = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000]
 
 
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     lines = [ave_ER, ave_AGEM, ave_CFA]
     errors = [sem_ER, sem_AGEM, sem_CFA] if args.n_seeds > 1 else None
     line_names = ["ER", "A-GEM", "CFA"]
-    colors = ["red", "orangered", "green"]
+    colors = ["red", "blue", "green"]
     if not checkattr(args, 'no_fromp'):
         lines.append(ave_FROMP)
         line_names.append("FROMP")
