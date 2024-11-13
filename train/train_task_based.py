@@ -118,9 +118,9 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
             iters_left_previous = [1]*up_to_context
             data_loader_previous = [None]*up_to_context
 
-        # TODO this is a quick hack to reduce iters & bs for few-shot finetuning
         if context >= 0 and len(training_dataset) < batch_size:
-            batch_size = 256 # few-shot dataset for CIFAR100 is 10 samples * 10 classes
+            print("Assuming Fine-tuning setting, reducing batch size and iterations")
+            batch_size = len(training_dataset) # few-shot dataset for CIFAR100 is 10 samples * 10 classes
             iters = 100     # 400 iters overfits
 
         # Define tqdm progress bar(s)
