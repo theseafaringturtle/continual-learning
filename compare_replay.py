@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import logging
 import os
 import numpy as np
 # -custom-written code
@@ -45,11 +46,11 @@ def get_result(args):
     param_stamp = get_param_stamp_from_args(args)
     # -check whether already run, and if not do so
     if os.path.isfile('{}/acc-{}.txt'.format(args.r_dir, param_stamp)):
-        print(" already run: {}".format(param_stamp))
+        logging.info(" already run: {}".format(param_stamp))
     else:
         args.train = True
-        print("\n ...running: {} ...".format(param_stamp))
-        main.run(args)
+        logging.info("\n ...running: {} ...".format(param_stamp))
+        main.run(args, verbose=True)
     # -get average accuracy
     fileName = '{}/acc-{}.txt'.format(args.r_dir, param_stamp)
     file = open(fileName)
@@ -62,7 +63,7 @@ def get_result(args):
 def collect_all(method_dict, seed_list, args, name=None):
     # -print name of method on screen
     if name is not None:
-        print("\n------{}------".format(name))
+        logging.info("\n------{}------".format(name))
     # -run method for all random seeds
     for seed in seed_list:
         args.seed = seed
@@ -91,6 +92,16 @@ if __name__ == '__main__':
         budget_list = budget_list_CIFAR100_GFSL
     else:
         budget_list = budget_list_splitMNIST
+
+    logging.basicConfig(filename=args.experiment + '.txt',
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.DEBUG)
+
+    logging.info("Starting logging for " + args.experiment)
+
+    logger = logging.getLogger('replay')
 
 
     #-------------------------------------------------------------------------------------------------#
@@ -307,4 +318,4 @@ if __name__ == '__main__':
     pp.close()
 
     # Print name of generated plot on screen
-    print("\nGenerated plot: {}/{}.pdf\n".format(args.p_dir, plot_name))
+    logging.info("\nGenerated plot: {}/{}.pdf\n".format(args.p_dir, plot_name))
